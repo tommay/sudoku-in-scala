@@ -27,7 +27,7 @@ case class Solver (
     unknowns match {
       case Nil =>
 	// No more unknowns, solved!
-	Stream(Solution(puzzle, steps))
+	Stream(Solution(puzzle, steps.reverse))
       case _ =>
 	// Carry on with solutionsHeuristic
 	solutionsHeuristic
@@ -44,7 +44,7 @@ case class Solver (
     val newSolver = place(placement.cellNumber, placement.digit)
     val step = Step(newSolver.puzzle, Some(placement), next.description)
     // xxx use a Stream?  Prepend and reverse if/when needed?
-    val newSteps = steps ++ List(step)
+    val newSteps = step :: steps
     val newSolver2 = newSolver.copy(steps = newSteps)
     newSolver2.solutionsTop
   }
