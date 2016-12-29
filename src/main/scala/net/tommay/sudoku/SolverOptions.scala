@@ -48,11 +48,11 @@ case class SolverOptions(
 }
 
 object SolverOptions {
-  val all = SolverOptions(List(), false, true)
+  val all = new SolverOptions(List(), false, true)
 
   // Try Forced first because it's fast.  EasyPeasy, MissingOne, and MissingTwo
   // are redundant with Forced.
 
-  val noGuessing = SolverOptions(
+  val noGuessing = new SolverOptions(
     List(Forced, Needed, Tricky), false, false)
 }
