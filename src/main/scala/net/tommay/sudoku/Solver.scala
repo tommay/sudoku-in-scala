@@ -110,14 +110,23 @@ case class Solver (
 
   // For each digit in the list, use it as a guess for unknown
   // and try to solve the resulting Puzzle.
-  // XXX How to do this with : instead of ++?
-  //
+
+  // XXX On Haskell this works brilliantly, and solutions are
+  // calcuated lazily while Solve is printing and counting them, and a
+  // small fixed amount of memory is used no matter how many solutions
+  // there are.  On Scala the calculation and printing are correctly
+  // interleaved, but memory use increases and eventually blows up if
+  // there are thousands of solutions.  It's like something is holding
+  // ontp a head somewhere.  Something's not right.
+
+  // XXX Actually this is not the same as Haskell because the Haskell
+  // code is passing in previous solutions tail-call style.
+  
   def doGuesses(cellNumber: Int, digits: Iterable[Int])
     : Stream[Solution] =
   {
     digits.foldLeft(Stream.empty[Solution]) {(accum, digit) =>
       val next = Next("Guess", Placement(cellNumber, digit))
-      // xxx need the lazy magic here
       accum #::: placeAndContinue(next)
     }
   }
