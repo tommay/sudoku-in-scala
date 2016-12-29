@@ -24,7 +24,6 @@ case class Solver (
   // scala.util.control.TailCalls
   // 
   def solutionsTop : Stream[Solution] = {
-    println(unknowns.size)
     unknowns match {
       case Nil =>
 	// No more unknowns, solved!
@@ -58,7 +57,6 @@ case class Solver (
     // make a guess for.
 
     val minUnknown = Util.minBy(unknowns, Unknown.numPossible)
-    println(minUnknown)
     val cellNumber = minUnknown.cellNumber
     // This is a List:
     val possible = minUnknown.getPossible
@@ -71,10 +69,8 @@ case class Solver (
 	// we only use the force if a) we're guessing, b) we're not
 	// using heuristics, because if we are then forcing is done by
 	// findForced.
-	println(options)
 	if (options.useGuessing && !options.useHeuristics) {
           val next = Next("Forced guess", Placement(cellNumber, digit))
-	  println(next)
           placeAndContinue(next)
 	}
         else {
