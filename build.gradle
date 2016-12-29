@@ -1,4 +1,4 @@
-// Hot to configure different scala versions, etc:
+// How to configure different scala versions, etc:
 // http://jesseyates.com/2015/06/18/dev-tip-using-gradle-without-hating-it.html
 
 apply plugin: 'scala'
@@ -9,6 +9,13 @@ repositories {
 
 dependencies {
     compile 'org.scala-lang:scala-library:2.12.1'
+}
+
+// http://stackoverflow.com/questions/27494428/running-a-jar-produce-from-gradle-build
+jar {
+    manifest {
+        attributes 'Main-Class': 'net.tommay.sudoku.Solve'
+    }
 }
 
 task compileOne (type: ScalaCompile) {
