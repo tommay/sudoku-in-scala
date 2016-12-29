@@ -4,11 +4,12 @@ package net.tommay.sudoku
 
 case class Random(seed: Int) {
   def this() = {
-    this(0)
+    // 2 is a random number.
+    this(2)
   }
 
-  def fork : Random = {
-    Random(next ^ 0x87654321)
+  def next : Int = {
+    seed
   }
 
   def randomR(lo: Int, hi: Int) : (Int, Random) = {
@@ -17,8 +18,8 @@ case class Random(seed: Int) {
     (result, Random(r))
   }
 
-  def next : Int = {
-    1
+  def fork : Random = {
+    new Random()
   }
 }
 
