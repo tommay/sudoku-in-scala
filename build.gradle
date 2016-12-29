@@ -16,6 +16,17 @@ jar {
     manifest {
         attributes 'Main-Class': 'net.tommay.sudoku.Solve'
     }
+    /*
+    // This builds an uberjar:  Be nice to run it through proguard.
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+        configurations.runtime.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    */
 }
 
 task compileOne (type: ScalaCompile) {
