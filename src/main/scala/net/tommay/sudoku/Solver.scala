@@ -7,7 +7,15 @@ case class Solver (
   val unknowns: List[Unknown] = List(),
   val steps: List[Step] = List())	// xxx need initial puzzle step
 {
-  def solutionsTop : Iterable[Solution] = {
+  def place(cellNumber: Int, digit: Int) : Solver = {
+    val newPuzzle = puzzle.place(cellNumber, digit)
+    val newUnknowns = unknowns
+      .filter(_.cellNumber != cellNumber)
+      .map(_.place(cellNumber, digit))
+    this.copy(puzzle = newPuzzle, unknowns = newUnknowns)
+  }
+
+  def solutionsTop : Stream[Solution] = {
     unknowns match {
       case Nil =>
 	// No more unknowns, solved!
@@ -18,11 +26,22 @@ case class Solver (
     }
   }
 
-  def solutionsHeuristic : Iterable[Solution] = {
+  def solutionsHeuristic : Stream[Solution] = {
+    // XXX
     solutionsStuck
   }
 
-  def solutionsStuck : Iterable[Solution] = {
+  def placeAndContinue(next: Next) : Stream[Solution] = {
+    val placement = next.placement
+    val newSolver = place(placement.cellNumber, placement.digit)
+    val step = Step(newSolver.puzzle, Some(placement), next.description)
+    // xxx use a Stream?  Prepend and reverse if/when needed?
+    val newSteps = steps ++ List(step)
+    val newSolver2 = newSolver.copy(steps = newSteps)
+    newSolver2.solutionsTop
+  }
+
+  def solutionsStuck : Stream[Solution] = {
     // We get here because we can't place a digit using human-style
     // heuristics, so we've either failed or we have to guess and
     // recurse.  We can distinguish by examining the cell with the
@@ -43,7 +62,7 @@ case class Solver (
 	// using heuristics, because if we are then forcing is done by
 	// findForced.
 	if (options.useGuessing && !options.useHeuristics) {
-          val next = Next("Forced guess", digit, cellNumber)
+          val next = Next("Forced guess", Placement(digit, cellNumber))
           placeAndContinue(next)
 	}
         else {
@@ -67,7 +86,7 @@ case class Solver (
               // recurse.  We could use Random.split when shuffling or
               // recursing, but it's not really important for this
               // application.
-              val shuffledPossible = maybeShuffle(rnd, possible)
+              val shuffledPossible = Solver.maybeShuffle(rnd, possible)
               doGuesses(cellNumber, shuffledPossible)
 	    }
 	    else {
@@ -82,12 +101,21 @@ case class Solver (
   // XXX How to do this with : instead of ++?
   //
   def doGuesses(cellNumber: Int, digits: Iterable[Int])
-    : Iterable[Solution] =
+    : Stream[Solution] =
   {
-    digits.foldLeft(Stream.empty) {(accum, digit) =>
-      val next = Next("Guess", digit, cellNumber)
+    digits.foldLeft(Stream.empty[Solution]) {(accum, digit) =>
+      val next = Next("Guess", Placement(digit, cellNumber))
       // xxx need the lazy magic here
       accum #::: placeAndContinue(next)
+    }
+  }
+
+  def applyOneTrickySetIfAllowed : Option[Solver] = {
+    if (options.usePermanentTrickySets) {
+      None // XXX
+    }
+    else {
+      None
     }
   }
 }
@@ -97,9 +125,16 @@ object Solver {
     options: SolverOptions,
     rnd: Random,
     puzzle: Puzzle)
-    : Iterable[Solution] =
+    : Stream[Solution] =
   {
     val solver = Solver(options, Some(rnd), puzzle)
     solver.solutionsTop
+  }
+
+  def maybeShuffle[T](rnd: Option[Random], list: List[T]) : List[T] = {
+    rnd match {
+      case Some(rnd) => Util.shuffle(list, rnd)
+      case _ => list
+    }
   }
 }

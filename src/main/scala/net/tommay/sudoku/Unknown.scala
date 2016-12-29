@@ -25,10 +25,6 @@ case class Unknown(
     }
   }
 
-  def numPossible = {
-    Integer.bitCount(possible)
-  }
-
   def isDigitPossible(digit: Int) : Boolean = {
     (possible & (1 << (digit - 1))) != 0
   }
@@ -94,5 +90,9 @@ object Unknown {
       col = col,
       square = square,
       possible = 0x1FF)
+  }
+
+  def numPossible(unknown: Unknown) : Int = {
+    Integer.bitCount(unknown.possible)
   }
 }
