@@ -1,3 +1,6 @@
+// Hot to configure different scala versions, etc:
+// http://jesseyates.com/2015/06/18/dev-tip-using-gradle-without-hating-it.html
+
 apply plugin: 'scala'
 
 repositories {
@@ -7,3 +10,12 @@ repositories {
 dependencies {
     compile 'org.scala-lang:scala-library:2.12.1'
 }
+
+task compileOne (type: ScalaCompile) {
+    source = sourceSets.main.scala.srcDirs
+    include 'net/tommay/sudoku/Heuristic.scala'
+    classpath = sourceSets.main.compileClasspath
+    destinationDir = sourceSets.main.output.classesDir
+}
+
+compileOne.options.compilerArgs = ["-sourcepath", "$projectDir/src/main/scala"]
