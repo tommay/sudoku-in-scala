@@ -65,7 +65,7 @@ object Puzzle {
   // Returns a new Puzzle with nothing placed.
 
   def empty : Puzzle = {
-    new Puzzle
+    Puzzle()
   }
 
   // Returns a new Puzzle with each Cell initialized according to

@@ -1,5 +1,7 @@
 package net.tommay.sudoku
 
+import scala.util.Random
+
 class Util {
 }
 
@@ -9,5 +11,12 @@ object Util {
 
   def slices[T](n: Int, list: Seq[T]) : List[Seq[T]] = {
     list.grouped(n).toList
+  }
+
+  // This is not pure functional.  The sudoku code may be written so
+  // that doesn't matter nuch.
+  def split(rnd: Random) : (Random, Random) = {
+    val rnd2 = new Random(rnd.nextInt)
+    (rnd, rnd2)
   }
 }
