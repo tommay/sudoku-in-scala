@@ -53,7 +53,7 @@ object Solve {
     step.description + (step.placementOption match {
       case Some(placement) =>
 	val (row, col) = rowcol(placement.cellNumber)
-	": ($row, $col) ${placement.digit}"
+	s": ($row, $col) ${placement.digit}"
       case None => ""
     })
   }

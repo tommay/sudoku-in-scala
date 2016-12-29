@@ -57,7 +57,7 @@ case class Puzzle(val placed : Map[Int, Int] = Map.empty)
       Util.slices(9, superRow).map {row =>
 	Util.slices(3, row).map{_.mkString}.mkString(" ")
       }.mkString("\n")
-    }.mkString("\n")
+    }.mkString("\n\n")
   }
 }
 

@@ -15,7 +15,16 @@ case class Solver (
     this.copy(puzzle = newPuzzle, unknowns = newUnknowns)
   }
 
+  // All of the calls in the solutions chain which eventually may come
+  // back around to top are tail calls, but scala doesn't do tail call
+  // optimization except for direct recursion.  But we should make
+  // at most 81 deep nested calls to solutionsTop to solve a puzzle so
+  // we shouldn't blow the stack.  If we do, there are always trampolines:
+  // http://stackoverflow.com/questions/16539488/why-scala-doesnt-make-tail-call-optimization
+  // scala.util.control.TailCalls
+  // 
   def solutionsTop : Stream[Solution] = {
+    println(unknowns.size)
     unknowns match {
       case Nil =>
 	// No more unknowns, solved!
@@ -49,6 +58,7 @@ case class Solver (
     // make a guess for.
 
     val minUnknown = Util.minBy(unknowns, Unknown.numPossible)
+    println(minUnknown)
     val cellNumber = minUnknown.cellNumber
     // This is a List:
     val possible = minUnknown.getPossible
@@ -61,8 +71,10 @@ case class Solver (
 	// we only use the force if a) we're guessing, b) we're not
 	// using heuristics, because if we are then forcing is done by
 	// findForced.
+	println(options)
 	if (options.useGuessing && !options.useHeuristics) {
-          val next = Next("Forced guess", Placement(digit, cellNumber))
+          val next = Next("Forced guess", Placement(cellNumber, digit))
+	  println(next)
           placeAndContinue(next)
 	}
         else {
@@ -104,7 +116,7 @@ case class Solver (
     : Stream[Solution] =
   {
     digits.foldLeft(Stream.empty[Solution]) {(accum, digit) =>
-      val next = Next("Guess", Placement(digit, cellNumber))
+      val next = Next("Guess", Placement(cellNumber, digit))
       // xxx need the lazy magic here
       accum #::: placeAndContinue(next)
     }
