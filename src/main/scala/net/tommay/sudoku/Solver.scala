@@ -4,8 +4,8 @@ case class Solver (
   val options: SolverOptions,
   val rnd: Option[Random],
   val puzzle: Puzzle,
-  val unknowns: List[Unknown] = List(),
-  val steps: List[Step] = List())	// xxx need initial puzzle step
+  val unknowns: List[Unknown],
+  val steps: List[Step])
 {
   def place(cellNumber: Int, digit: Int) : Solver = {
     val newPuzzle = puzzle.place(cellNumber, digit)
@@ -121,14 +121,39 @@ case class Solver (
 }
 
 object Solver {
+  def empty(options: SolverOptions, rnd: Option[Random], puzzle: Puzzle)
+    : Solver =
+  {
+    val (rnd1, rnd2) = maybeSplit(rnd)
+    val unknowns = maybeShuffle(rnd1, (0 to 80).map(Unknown(_)).toList)
+    val step = Step(puzzle, None, "Initial puzzle")
+    new Solver(options, rnd, puzzle, unknowns, List(step))
+  }
+
+  def create(options: SolverOptions, rnd: Option[Random], puzzle: Puzzle)
+    : Solver =
+  {
+    val solver = empty(options, rnd, puzzle)
+    puzzle.each.foldLeft(solver) {case (accum, (cellNumber, digit)) =>
+      accum.place(cellNumber, digit)
+    }
+  }
+
   def randomSolutions(
     options: SolverOptions,
     rnd: Random,
     puzzle: Puzzle)
     : Stream[Solution] =
   {
-    val solver = Solver(options, Some(rnd), puzzle)
+    val solver = Solver.create(options, Some(rnd), puzzle)
     solver.solutionsTop
+  }
+
+  def maybeSplit(rnd: Option[Random]) : (Option[Random], Option[Random]) = {
+    rnd match {
+      case r@Some(rnd) => (r, Some(rnd.fork))
+      case _ => (rnd, rnd)
+    }
   }
 
   def maybeShuffle[T](rnd: Option[Random], list: List[T]) : List[T] = {

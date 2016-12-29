@@ -25,4 +25,3 @@ case class Random(seed: Int) {
 
 object Random {
 }
-
