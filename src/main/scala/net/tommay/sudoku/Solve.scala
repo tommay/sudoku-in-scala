@@ -49,7 +49,7 @@ object Solve {
   }
 
   def printSolution(solution: Solution) {
-    if (true) {
+    if (false) {
       solution.steps.foreach {step =>
         println(showStep(step))
       }
