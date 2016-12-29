@@ -33,7 +33,7 @@ case class Unknown(
     (possible & (1 << (digit - 1))) != 0
   }
 
-  def removeDigitFromPossible(digit: Int) {
+  def removeDigitFromPossible(digit: Int) : Unknown = {
     this.copy(possible = possible & ~(1 << (digit - 1)))
   }
 

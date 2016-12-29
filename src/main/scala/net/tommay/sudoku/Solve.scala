@@ -10,7 +10,7 @@ object Solve {
     val filename = args(1)
     val setup = getSetup(filename)
     val puzzle = Puzzle.fromString(setup)
-    val rnd = new scala.util.Random(0)
+    val rnd = new Random()
     val solutions = Solver.randomSolutions(options, rnd, puzzle)
     val count = processAndCount(solutions, printSolution)
     println(s"There are $count solutions.")
