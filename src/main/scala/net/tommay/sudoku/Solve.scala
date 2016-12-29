@@ -7,7 +7,7 @@ object Solve {
   // if any.
 
   def main(args: Array[String]) {
-    val filename = args(1)
+    val filename = args(0)
     val setup = getSetup(filename)
     val puzzle = Puzzle.fromString(setup)
     val rnd = new Random()
