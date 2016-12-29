@@ -11,8 +11,16 @@ object Solve {
     val setup = getSetup(filename)
     val puzzle = Puzzle.fromString(setup)
     val rnd = new Random()
-    val solutions = Solver.randomSolutions(options, rnd, puzzle)
-    val count = processAndCount(solutions, printSolution)
+    // It is critical not to put the result of randomSolutions in a
+    // val here because that holds onto the head even though it would
+    // just be passed to processAndCount and the val would become dead
+    // and collectable.  Scala/JVM doesn't see it that way.
+    // We get away with passing it to processAndCount which is recursive
+    // so the top-level call has the head, except that Scala properly
+    // optimizes the recursive tail call so we're ok.
+    val count = processAndCount(
+      Solver.randomSolutions(options, rnd, puzzle),
+      printSolution)
     println(s"There are $count solutions.")
   }
 
