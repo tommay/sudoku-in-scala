@@ -5,6 +5,7 @@ package net.tommay.sudoku
 // cellNumber -> Digit
 
 // XXX Puzzle is a case class only to get the copy method.
+// XXX this should be private, all construction via Puzzle.methods.
 
 case class Puzzle(val placed : Map[Int, Int] = Map.empty)
 {
