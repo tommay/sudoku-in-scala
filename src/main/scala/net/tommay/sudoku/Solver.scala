@@ -220,12 +220,12 @@ object Solver {
 
   def getHeuristicFunction(heuristic: Heuristic) : Solver => Iterable[Next] = {
     heuristic match {
-      case EasyPeasy => {x: Solver => x.findEasyPeasy}
-      case MissingOne => {x: Solver => x.findMissingOne}
-      case MissingTwo => {x: Solver => x.findMissingTwo}
-      case Tricky => {x: Solver => x.findTricky}
-      case Needed => {x: Solver => x.findNeeded}
-      case Forced => {x: Solver => x.findForced}
+      case EasyPeasy => {_.findEasyPeasy}
+      case MissingOne => {_.findMissingOne}
+      case MissingTwo => {_.findMissingTwo}
+      case Tricky => {_.findTricky}
+      case Needed => {_.findNeeded}
+      case Forced => {_.findForced}
     }
   }
 
