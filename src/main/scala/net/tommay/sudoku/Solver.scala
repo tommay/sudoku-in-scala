@@ -1,5 +1,7 @@
 package net.tommay.sudoku
 
+import net.tommay.sudoku.Heuristic._
+
 case class Solver (
   val options: SolverOptions,
   val rnd: Option[Random],
@@ -34,9 +36,56 @@ case class Solver (
     }
   }
 
+  // Call each function on this, and return the first non-empty
+  // result.  Return an empty list if all results are empty.
+
+  def tryHeuristics(list: Iterable[Solver => Iterable[Next]])
+    : Iterable[Next] =
+  {
+    list match {
+      case Nil => List.empty
+      case head :: tail =>
+	head(this) match {
+	  case Nil => tryHeuristics(tail)
+	  case nextList => nextList
+	}
+    }
+  }
+
   def solutionsHeuristic : Stream[Solution] = {
-    // XXX
-    solutionsStuck
+    if (options.useHeuristics) {
+      // Try the heuristic functions.
+      tryHeuristics(heuristics) match {
+	case Nil =>
+	  // All heuristics returned empty lists.
+	  solutionsStuck
+	case nextList =>
+	  val (rnd1, rnd2) = Solver.maybeSplit(rnd)
+	  // XXX if we're not doing things at random then all we ever need
+	  // is the first element.
+	  val next = Solver.pickRandom(nextList, rnd1)
+	  val nextSolver = this.copy(rnd = rnd2)
+	  nextSolver.placeAndContinue(next)
+      }
+    }
+    else {
+      // Skip the heuristics and continue with solutionsStuck.
+      solutionsStuck
+    }
+  }
+
+  // XXX Put this in Solver instead of calling it every time.
+  def heuristics : Iterable[Solver => Iterable[Next]] = {
+    options.heuristics.map{
+      _ match {
+	case EasyPeasy => {x: Solver => x.findEasyPeasy}
+	case MissingOne => {x: Solver => x.findMissingOne}
+	case MissingTwo => {x: Solver => x.findMissingTwo}
+	case Tricky => {x: Solver => x.findTricky}
+	case Needed => {x: Solver => x.findNeeded}
+	case Forced => {x: Solver => x.findForced}
+      }
+    }
   }
 
   def placeAndContinue(next: Next) : Stream[Solution] = {
@@ -135,6 +184,30 @@ case class Solver (
       None
     }
   }
+
+  def findEasyPeasy : Iterable[Next] = {
+    List.empty
+  }
+
+  def findMissingOne : Iterable[Next] = {
+    List.empty
+  }
+
+  def findMissingTwo : Iterable[Next] = {
+    List.empty
+  }
+
+  def findTricky : Iterable[Next] = {
+    List.empty
+  }
+
+  def findNeeded : Iterable[Next] = {
+    List.empty
+  }
+
+  def findForced : Iterable[Next] = {
+    List.empty
+  }
 }
 
 object Solver {
@@ -178,5 +251,10 @@ object Solver {
       case Some(rnd) => Util.shuffle(list, rnd)
       case _ => list
     }
+  }
+
+  def pickRandom[T](list: Iterable[T], rnd: Option[Random]) : T = {
+    // XXX
+    list.head
   }
 }
