@@ -7,7 +7,8 @@ case class Solver (
   val rnd: Option[Random],
   val puzzle: Puzzle,
   val unknowns: List[Unknown],
-  val steps: List[Step])
+  val steps: List[Step],
+  val heuristics: Iterable[Solver => Iterable[Next]])
 {
   def place(cellNumber: Int, digit: Int) : Solver = {
     val newPuzzle = puzzle.place(cellNumber, digit)
@@ -74,20 +75,6 @@ case class Solver (
     }
   }
 
-  // XXX Put this in Solver instead of calling it every time.
-  def heuristics : Iterable[Solver => Iterable[Next]] = {
-    options.heuristics.map{
-      _ match {
-	case EasyPeasy => {x: Solver => x.findEasyPeasy}
-	case MissingOne => {x: Solver => x.findMissingOne}
-	case MissingTwo => {x: Solver => x.findMissingTwo}
-	case Tricky => {x: Solver => x.findTricky}
-	case Needed => {x: Solver => x.findNeeded}
-	case Forced => {x: Solver => x.findForced}
-      }
-    }
-  }
-
   def placeAndContinue(next: Next) : Stream[Solution] = {
     val placement = next.placement
     val newSolver = place(placement.cellNumber, placement.digit)
@@ -134,7 +121,7 @@ case class Solver (
       case  _ =>
 	// Multiple possibilities.  Before we guess, see if it's
 	// possible to permanently apply a TrickySet to create
-	// possibiities for heurisstics.
+	// possibiities for heuristics.
 	applyOneTrickySetIfAllowed match {
           case Some(newSolver) => newSolver.solutionsTop
           case _ =>
@@ -217,7 +204,9 @@ object Solver {
     val (rnd1, rnd2) = maybeSplit(rnd)
     val unknowns = maybeShuffle(rnd1, (0 to 80).map(Unknown(_)).toList)
     val step = Step(puzzle, None, "Initial puzzle")
-    new Solver(options, rnd, puzzle, unknowns, List(step))
+    val heuristicFunctions = options.heuristics.map(getHeuristicFunction)
+    new Solver(options, rnd, puzzle, unknowns, List(step),
+	       heuristicFunctions)
   }
 
   def create(options: SolverOptions, rnd: Option[Random], puzzle: Puzzle)
@@ -226,6 +215,17 @@ object Solver {
     val solver = empty(options, rnd, puzzle)
     puzzle.each.foldLeft(solver) {case (accum, (cellNumber, digit)) =>
       accum.place(cellNumber, digit)
+    }
+  }
+
+  def getHeuristicFunction(heuristic: Heuristic) : Solver => Iterable[Next] = {
+    heuristic match {
+      case EasyPeasy => {x: Solver => x.findEasyPeasy}
+      case MissingOne => {x: Solver => x.findMissingOne}
+      case MissingTwo => {x: Solver => x.findMissingTwo}
+      case Tricky => {x: Solver => x.findTricky}
+      case Needed => {x: Solver => x.findNeeded}
+      case Forced => {x: Solver => x.findForced}
     }
   }
 
