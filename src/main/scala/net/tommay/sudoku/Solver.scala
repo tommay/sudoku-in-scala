@@ -37,22 +37,6 @@ case class Solver (
     }
   }
 
-  // Call each function on this, and return the first non-empty
-  // result.  Return an empty list if all results are empty.
-
-  def tryHeuristics(list: Iterable[Solver => Iterable[Next]])
-    : Iterable[Next] =
-  {
-    list match {
-      case Nil => List.empty
-      case head :: tail =>
-	head(this) match {
-	  case Nil => tryHeuristics(tail)
-	  case nextList => nextList
-	}
-    }
-  }
-
   def solutionsHeuristic : Stream[Solution] = {
     if (options.useHeuristics) {
       // Try the heuristic functions.
@@ -72,6 +56,22 @@ case class Solver (
     else {
       // Skip the heuristics and continue with solutionsStuck.
       solutionsStuck
+    }
+  }
+
+  // Call each function on this, and return the first non-empty
+  // result.  Return an empty list if all results are empty.
+
+  def tryHeuristics(list: Iterable[Solver => Iterable[Next]])
+    : Iterable[Next] =
+  {
+    list match {
+      case Nil => Iterable.empty
+      case func :: tail =>
+	func(this) match {
+	  case Nil => tryHeuristics(tail)
+	  case nextList => nextList
+	}
     }
   }
 
