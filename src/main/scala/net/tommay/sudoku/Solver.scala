@@ -163,6 +163,20 @@ case class Solver (
     }
   }
 
+  def findForced : Iterable[Next] = {
+    unknowns.flatMap(findForcedForUnknown("Forced"))
+  }
+
+  def findForcedForUnknown(description: String)(unknown: Unknown) :
+    Iterable[Next] =
+  {
+      unknown.getPossible match {
+	case List(digit) =>
+	  Iterable(Next(description, Placement(unknown.cellNumber, digit)))
+	case _ => Iterable.empty
+      }
+  }
+
   def applyOneTrickySetIfAllowed : Option[Solver] = {
     if (options.usePermanentTrickySets) {
       None // XXX
@@ -189,10 +203,6 @@ case class Solver (
   }
 
   def findNeeded : Iterable[Next] = {
-    List.empty
-  }
-
-  def findForced : Iterable[Next] = {
     List.empty
   }
 }
