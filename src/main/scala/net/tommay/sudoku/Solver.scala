@@ -3,12 +3,12 @@ package net.tommay.sudoku
 import net.tommay.sudoku.Heuristic._
 
 case class Solver (
-  val options: SolverOptions,
-  val rnd: Option[Random],
-  val puzzle: Puzzle,
-  val unknowns: List[Unknown],
-  val steps: List[Step],
-  val heuristics: Iterable[Solver => Stream[Next]])
+  options: SolverOptions,
+  rnd: Option[Random],
+  puzzle: Puzzle,
+  unknowns: List[Unknown],
+  steps: List[Step],
+  heuristics: Iterable[Solver => Stream[Next]])
 {
   def place(cellNumber: Int, digit: Int) : Solver = {
     val newPuzzle = puzzle.place(cellNumber, digit)

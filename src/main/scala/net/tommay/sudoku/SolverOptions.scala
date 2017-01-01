@@ -34,10 +34,10 @@ import net.tommay.sudoku.Heuristic._
 // it's impossible to solve these puzzles visually.
 
 case class SolverOptions(
-  val useHeuristics: Boolean,
-  val heuristics: Iterable[Heuristic],
-  val usePermanentTrickySets: Boolean,
-  val useGuessing: Boolean)
+  useHeuristics: Boolean,
+  heuristics: Iterable[Heuristic],
+  usePermanentTrickySets: Boolean,
+  useGuessing: Boolean)
 {
   def this(heuristics: Iterable[Heuristic],
 	   usePermanentTrickySets: Boolean,

@@ -7,8 +7,8 @@ package net.tommay.sudoku
 // XXX Everything ends up being Vectors.  Compare speed to List.
 
 case class ExclusionSet(
-  val name: String,
-  val cells: Iterable[Int])
+  name: String,
+  ells: Iterable[Int])
 {
 }
 

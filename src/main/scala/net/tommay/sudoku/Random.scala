@@ -2,7 +2,9 @@ package net.tommay.sudoku
 
 // XXX stub class
 
-case class Random(seed: Int) {
+case class Random(
+  seed: Int)
+{
   def this() = {
     // 2 is a random number.
     this(2)
