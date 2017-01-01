@@ -1,10 +1,7 @@
 package net.tommay.sudoku
 
-//import net.tommay.sudoku.Util
-
 // cellNumber -> Digit
 
-// XXX Puzzle is a case class only to get the copy method.
 // XXX this should be private, all construction via Puzzle.methods.
 
 case class Puzzle(
@@ -12,8 +9,6 @@ case class Puzzle(
 {
   type Digit = Int
 
-  // XXX eventhough wwe're returning a Map, we can only call Iterable
-  // methods on it, right?
   def each: Iterable[(Int, Digit)] = {
     placed
   }

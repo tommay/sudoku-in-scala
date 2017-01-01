@@ -7,6 +7,8 @@ case class Solver (
   rnd: Option[Random],
   puzzle: Puzzle,
   unknowns: List[Unknown],
+  // steps is consed in reverse order.  It is reversed when
+  // constructing a Solution.
   steps: List[Step],
   heuristics: Iterable[Solver => Stream[Next]])
 {
@@ -79,7 +81,6 @@ case class Solver (
     val placement = next.placement
     val newSolver = place(placement.cellNumber, placement.digit)
     val step = Step(newSolver.puzzle, Some(placement), next.description)
-    // xxx use a Stream?  Prepend and reverse if/when needed?
     val newSteps = step :: steps
     val newSolver2 = newSolver.copy(steps = newSteps)
     newSolver2.solutionsTop
@@ -143,17 +144,6 @@ case class Solver (
   // For each digit in the list, use it as a guess for unknown
   // and try to solve the resulting Puzzle.
 
-  // XXX On Haskell this works brilliantly, and solutions are
-  // calcuated lazily while Solve is printing and counting them, and a
-  // small fixed amount of memory is used no matter how many solutions
-  // there are.  On Scala the calculation and printing are correctly
-  // interleaved, but memory use increases and eventually blows up if
-  // there are thousands of solutions.  It's like something is holding
-  // ontp a head somewhere.  Something's not right.
-
-  // XXX Actually this is not the same as Haskell because the Haskell
-  // code is passing in previous solutions tail-call style.
-  
   def doGuesses(cellNumber: Int, digits: Iterable[Int])
     : Stream[Solution] =
   {
