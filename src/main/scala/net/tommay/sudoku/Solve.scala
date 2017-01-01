@@ -37,7 +37,7 @@ object Solve {
   {
     list.headOption match {
       case Some(head) =>
-	func(head)
+        func(head)
         processAndCount(list.tail, func, count + 1)
       case _ => count
     }
@@ -55,8 +55,8 @@ object Solve {
   def showStep(step: Step) : String = {
     step.description + (step.placementOption match {
       case Some(placement) =>
-	val (row, col) = rowcol(placement.cellNumber)
-	s": ($row, $col) ${placement.digit}"
+        val (row, col) = rowcol(placement.cellNumber)
+        s": ($row, $col) ${placement.digit}"
       case None => ""
     })
   }

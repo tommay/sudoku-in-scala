@@ -40,8 +40,8 @@ case class SolverOptions(
   useGuessing: Boolean)
 {
   def this(heuristics: Iterable[Heuristic],
-	   usePermanentTrickySets: Boolean,
-	   useGuessing: Boolean)
+           usePermanentTrickySets: Boolean,
+           useGuessing: Boolean)
   {
     this(heuristics.nonEmpty, heuristics, usePermanentTrickySets, useGuessing)
   }

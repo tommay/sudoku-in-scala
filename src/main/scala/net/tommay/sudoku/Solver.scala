@@ -29,11 +29,11 @@ case class Solver (
   def solutionsTop : Stream[Solution] = {
     unknowns match {
       case Nil =>
-	// No more unknowns, solved!
-	Stream(Solution(puzzle, steps.reverse))
+        // No more unknowns, solved!
+        Stream(Solution(puzzle, steps.reverse))
       case _ =>
-	// Carry on with solutionsHeuristic
-	solutionsHeuristic
+        // Carry on with solutionsHeuristic
+        solutionsHeuristic
     }
   }
 
@@ -41,16 +41,16 @@ case class Solver (
     if (options.useHeuristics) {
       // Try the heuristic functions.
       tryHeuristics(heuristics) match {
-	case Stream.Empty =>
-	  // All heuristics returned empty lists.
-	  solutionsStuck
-	case nextList =>
-	  val (rnd1, rnd2) = Solver.maybeSplit(rnd)
-	  // XXX if we're not doing things at random then all we ever need
-	  // is the first element.
-	  val next = Solver.pickRandom(nextList, rnd1)
-	  val nextSolver = this.copy(rnd = rnd2)
-	  nextSolver.placeAndContinue(next)
+        case Stream.Empty =>
+          // All heuristics returned empty lists.
+          solutionsStuck
+        case nextList =>
+          val (rnd1, rnd2) = Solver.maybeSplit(rnd)
+          // XXX if we're not doing things at random then all we ever need
+          // is the first element.
+          val next = Solver.pickRandom(nextList, rnd1)
+          val nextSolver = this.copy(rnd = rnd2)
+          nextSolver.placeAndContinue(next)
       }
     }
     else {
@@ -68,10 +68,10 @@ case class Solver (
     list match {
       case Nil => Stream.empty
       case func :: tail =>
-	func(this) match {
-	  case Stream.Empty => tryHeuristics(tail)
-	  case nextList => nextList
-	}
+        func(this) match {
+          case Stream.Empty => tryHeuristics(tail)
+          case nextList => nextList
+        }
     }
   }
 
@@ -98,45 +98,45 @@ case class Solver (
     val possible = minUnknown.getPossible
     possible match {
       case Nil =>
-	// Failed.  No solutions.
-	Stream.empty
+        // Failed.  No solutions.
+        Stream.empty
       case List(digit) =>
-	// One possibility.  The choice is forced, no guessing.  But
-	// we only use the force if a) we're guessing, b) we're not
-	// using heuristics, because if we are then forcing is done by
-	// findForced.
-	if (options.useGuessing && !options.useHeuristics) {
+        // One possibility.  The choice is forced, no guessing.  But
+        // we only use the force if a) we're guessing, b) we're not
+        // using heuristics, because if we are then forcing is done by
+        // findForced.
+        if (options.useGuessing && !options.useHeuristics) {
           val next = Next("Forced guess", Placement(cellNumber, digit))
           placeAndContinue(next)
-	}
+        }
         else {
-	  // There is a forced guess but we're not configured to use
-	  // it.  See if we can apply a TrickySet to create an
-	  // opportunity.
+          // There is a forced guess but we're not configured to use
+          // it.  See if we can apply a TrickySet to create an
+          // opportunity.
           applyOneTrickySetIfAllowed match {
             case Some(newSolver) => newSolver.solutionsTop
             case _ => Stream.empty
-	  }
-	}
+          }
+        }
       case  _ =>
-	// Multiple possibilities.  Before we guess, see if it's
-	// possible to permanently apply a TrickySet to create
-	// possibiities for heuristics.
-	applyOneTrickySetIfAllowed match {
+        // Multiple possibilities.  Before we guess, see if it's
+        // possible to permanently apply a TrickySet to create
+        // possibiities for heuristics.
+        applyOneTrickySetIfAllowed match {
           case Some(newSolver) => newSolver.solutionsTop
           case _ =>
-	    if (options.useGuessing) {
+            if (options.useGuessing) {
               // Guess each possibility, maybe in a random order, and
               // recurse.  We could use Random.split when shuffling or
               // recursing, but it's not really important for this
               // application.
               val shuffledPossible = Solver.maybeShuffle(rnd, possible)
               doGuesses(cellNumber, shuffledPossible)
-	    }
-	    else {
-	      Stream.empty
-	    }
-	}
+            }
+            else {
+              Stream.empty
+            }
+        }
     }
   }
 
@@ -176,10 +176,10 @@ case class Solver (
   {
     unknown.numPossible match {
       case 1 =>
-	val digit = unknown.getPossible.head
-	Stream(Next(description, Placement(unknown.cellNumber, digit)))
+        val digit = unknown.getPossible.head
+        Stream(Next(description, Placement(unknown.cellNumber, digit)))
       case _ =>
-	Stream.empty
+        Stream.empty
     }
   }
 
@@ -222,7 +222,7 @@ object Solver {
     val step = Step(puzzle, None, "Initial puzzle")
     val heuristicFunctions = options.heuristics.map(getHeuristicFunction)
     new Solver(options, rnd, puzzle, unknowns, List(step),
-	       heuristicFunctions)
+               heuristicFunctions)
   }
 
   def create(options: SolverOptions, rnd: Option[Random], puzzle: Puzzle)

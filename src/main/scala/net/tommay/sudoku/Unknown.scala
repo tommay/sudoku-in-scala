@@ -48,10 +48,10 @@ case class Unknown(
     else {
       val rest = getPossibleList(p >> 1, digit + 1)
       if ((p & 1) != 0) {
-	digit :: rest
+        digit :: rest
       }
       else {
-	rest
+        rest
       }
     }
   }

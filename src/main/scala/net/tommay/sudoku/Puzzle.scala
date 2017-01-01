@@ -56,7 +56,7 @@ case class Puzzle(
     val string = this.toString
     Util.slices(27, string).map {superRow =>
       Util.slices(9, superRow).map {row =>
-	Util.slices(3, row).map{_.mkString}.mkString(" ")
+        Util.slices(3, row).map{_.mkString}.mkString(" ")
       }.mkString("\n")
     }.mkString("\n\n")
   }
@@ -77,8 +77,8 @@ object Puzzle {
     val zipped = (0 to 80).zip(digits)
     zipped.foldLeft(Puzzle.empty) {case (puzzle, (cellNumber, digit)) =>
       digit match {
-	case None => puzzle
-	case Some(digit) => puzzle.place(cellNumber, digit)
+        case None => puzzle
+        case Some(digit) => puzzle.place(cellNumber, digit)
       }
     }
   }
