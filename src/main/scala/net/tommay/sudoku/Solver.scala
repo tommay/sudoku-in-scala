@@ -92,7 +92,7 @@ case class Solver (
     // fewest possibilities remaining, which is also the best cell to
     // make a guess for.
 
-    val minUnknown = Util.minBy(unknowns, Unknown.numPossible)
+    val minUnknown = Util.minBy(unknowns, {x: Unknown => x.numPossible})
     val cellNumber = minUnknown.cellNumber
     // This is a List:
     val possible = minUnknown.getPossible
@@ -174,10 +174,12 @@ case class Solver (
   def findForcedForUnknown(description: String)(unknown: Unknown) :
     Stream[Next] =
   {
-    unknown.getPossible match {
-      case List(digit) =>
+    unknown.numPossible match {
+      case 1 =>
+	val digit = unknown.getPossible.head
 	Stream(Next(description, Placement(unknown.cellNumber, digit)))
-      case _ => Stream.empty
+      case _ =>
+	Stream.empty
     }
   }
 

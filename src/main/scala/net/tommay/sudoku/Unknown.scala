@@ -33,6 +33,10 @@ case class Unknown(
     this.copy(possible = possible & ~(1 << (digit - 1)))
   }
 
+  def numPossible : Int = {
+    Integer.bitCount(possible)
+  }
+
   def getPossible : List[Int] = {
     getPossibleList(possible, 1)
   }
@@ -90,9 +94,5 @@ object Unknown {
       col = col,
       square = square,
       possible = 0x1FF)
-  }
-
-  def numPossible(unknown: Unknown) : Int = {
-    Integer.bitCount(unknown.possible)
   }
 }
