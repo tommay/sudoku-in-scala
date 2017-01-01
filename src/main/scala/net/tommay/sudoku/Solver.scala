@@ -8,7 +8,7 @@ case class Solver (
   val puzzle: Puzzle,
   val unknowns: List[Unknown],
   val steps: List[Step],
-  val heuristics: Iterable[Solver => Iterable[Next]])
+  val heuristics: Iterable[Solver => Stream[Next]])
 {
   def place(cellNumber: Int, digit: Int) : Solver = {
     val newPuzzle = puzzle.place(cellNumber, digit)
@@ -41,7 +41,7 @@ case class Solver (
     if (options.useHeuristics) {
       // Try the heuristic functions.
       tryHeuristics(heuristics) match {
-	case Nil =>
+	case Stream.Empty =>
 	  // All heuristics returned empty lists.
 	  solutionsStuck
 	case nextList =>
@@ -62,14 +62,14 @@ case class Solver (
   // Call each function on this, and return the first non-empty
   // result.  Return an empty list if all results are empty.
 
-  def tryHeuristics(list: Iterable[Solver => Iterable[Next]])
-    : Iterable[Next] =
+  def tryHeuristics(list: Iterable[Solver => Stream[Next]])
+    : Stream[Next] =
   {
     list match {
-      case Nil => Iterable.empty
+      case Nil => Stream.empty
       case func :: tail =>
 	func(this) match {
-	  case Nil => tryHeuristics(tail)
+	  case Stream.Empty => tryHeuristics(tail)
 	  case nextList => nextList
 	}
     }
@@ -163,21 +163,22 @@ case class Solver (
     }
   }
 
-  def findForced : Iterable[Next] = {
+  def findForced : Stream[Next] = {
     // XXX Should unknowns be a Stream to begin with?
     unknowns.toStream.flatMap(findForcedForUnknown("Forced"))
   }
 
   // This can return either List or Stream.  But since it's going to be
   // flatMap'd by a Stream, returning Stream performs better.
+
   def findForcedForUnknown(description: String)(unknown: Unknown) :
-    Iterable[Next] =
+    Stream[Next] =
   {
-      unknown.getPossible match {
-	case List(digit) =>
-	  Stream(Next(description, Placement(unknown.cellNumber, digit)))
-	case _ => Stream.empty
-      }
+    unknown.getPossible match {
+      case List(digit) =>
+	Stream(Next(description, Placement(unknown.cellNumber, digit)))
+      case _ => Stream.empty
+    }
   }
 
   def applyOneTrickySetIfAllowed : Option[Solver] = {
@@ -189,24 +190,24 @@ case class Solver (
     }
   }
 
-  def findEasyPeasy : Iterable[Next] = {
-    List.empty
+  def findEasyPeasy : Stream[Next] = {
+    Stream.empty
   }
 
-  def findMissingOne : Iterable[Next] = {
-    List.empty
+  def findMissingOne : Stream[Next] = {
+    Stream.empty
   }
 
-  def findMissingTwo : Iterable[Next] = {
-    List.empty
+  def findMissingTwo : Stream[Next] = {
+    Stream.empty
   }
 
-  def findTricky : Iterable[Next] = {
-    List.empty
+  def findTricky : Stream[Next] = {
+    Stream.empty
   }
 
-  def findNeeded : Iterable[Next] = {
-    List.empty
+  def findNeeded : Stream[Next] = {
+    Stream.empty
   }
 }
 
@@ -231,7 +232,13 @@ object Solver {
     }
   }
 
-  def getHeuristicFunction(heuristic: Heuristic) : Solver => Iterable[Next] = {
+  // Heuristic functions return a Stream.  We may need only the first
+  // result (when creating a Puzzle, to see whether the Puzzle is
+  // solvable), or we may pick a random result (when providing a
+  // hint).  Using a Stream makes it ok either way since we'll only
+  // compute what we need.
+
+  def getHeuristicFunction(heuristic: Heuristic) : Solver => Stream[Next] = {
     heuristic match {
       case EasyPeasy => {_.findEasyPeasy}
       case MissingOne => {_.findMissingOne}
