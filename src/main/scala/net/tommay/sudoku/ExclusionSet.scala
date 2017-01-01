@@ -8,7 +8,7 @@ package net.tommay.sudoku
 
 case class ExclusionSet(
   name: String,
-  ells: Iterable[Int])
+  cells: Iterable[Int])
 {
 }
 
