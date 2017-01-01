@@ -153,8 +153,32 @@ case class Solver (
     }
   }
 
+  // Try to place a digit where an ExclusionSet has only one unplaced
+  // cell.
+
+  def findMissingOne : Stream[Next] = {
+    // XXX should exclusionSets be a Stream?
+    ExclusionSet.exclusionSets.toStream.flatMap{findMissingOneInSet(_)}
+  }
+
+  def findMissingOneInSet(set: ExclusionSet) : Stream[Next] = {
+    Solver.unknownsInSet(unknowns.toStream, set.cells) match {
+      case Stream(unknown) =>
+        // Exactly one cell in the set is unknown.  Place a digit in
+        // it.  Note that since this is the only unknown position in
+        // the set there should be exactly one possible digit
+        // remaining.  But we may have made a wrong guess, which
+        // leaves no possibilities.
+        findForcedForUnknown(s"Missing one in ${set.name}")(unknown)
+      case _ =>
+        // Zero or multiple cells in the set are unknown.
+        Stream.Empty
+    }
+  }
+
   def findForced : Stream[Next] = {
     // XXX Should unknowns be a Stream to begin with?
+    // XXX test performance of currying vs. not.
     unknowns.toStream.flatMap(findForcedForUnknown("Forced"))
   }
 
@@ -183,10 +207,6 @@ case class Solver (
   }
 
   def findEasyPeasy : Stream[Next] = {
-    Stream.empty
-  }
-
-  def findMissingOne : Stream[Next] = {
     Stream.empty
   }
 
@@ -256,6 +276,17 @@ object Solver {
       case r@Some(rnd) => (r, Some(rnd.fork))
       case _ => (rnd, rnd)
     }
+  }
+
+  // XXX Use a Set instead of an Iterable?
+
+  def unknownsInSet(unknowns: Stream[Unknown], set: Iterable[Int])
+    : Stream[Unknown] =
+  {
+    // XXX when set is an Iterable this needs to use exists, for most
+    // things it's more straightforward to use contains.
+
+    unknowns.filter(u => set.exists(_ == u.cellNumber))
   }
 
   def maybeShuffle[T](rnd: Option[Random], list: List[T]) : List[T] = {
