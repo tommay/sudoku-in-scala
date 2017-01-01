@@ -164,16 +164,19 @@ case class Solver (
   }
 
   def findForced : Iterable[Next] = {
-    unknowns.flatMap(findForcedForUnknown("Forced"))
+    // XXX Should unknowns be a Stream to begin with?
+    unknowns.toStream.flatMap(findForcedForUnknown("Forced"))
   }
 
+  // This can return either List or Stream.  But since it's going to be
+  // flatMap'd by a Stream, returning Stream performs better.
   def findForcedForUnknown(description: String)(unknown: Unknown) :
     Iterable[Next] =
   {
       unknown.getPossible match {
 	case List(digit) =>
-	  Iterable(Next(description, Placement(unknown.cellNumber, digit)))
-	case _ => Iterable.empty
+	  Stream(Next(description, Placement(unknown.cellNumber, digit)))
+	case _ => Stream.empty
       }
   }
 
