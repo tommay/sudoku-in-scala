@@ -196,6 +196,32 @@ case class Solver (
     }
   }
 
+  // Try to place a digit where there is a set that doesn't yet have
+  // some digit (i.e., it needs it) and there is only one cell in the
+  // set where it can possibly go.
+
+  def findNeeded : Stream[Next] = {
+     ExclusionSet.exclusionSets.toStream.flatMap(findNeededInSet(_))
+  }
+
+  def findNeededInSet(set: ExclusionSet) : Stream[Next] = {
+    val unknownsInSet = Solver.unknownsInSet(unknowns.toStream, set.cells)
+    (1 to 9).toStream.flatMap(findNeededDigitInSet(unknownsInSet, set.name))
+  }
+
+  def findNeededDigitInSet
+    (unknowns: Stream[Unknown], name:  String)
+    (digit: Int)
+    : Stream[Next] =
+  {
+    unknowns.filter(_.isDigitPossible(digit)) match {
+      case Stream(unknown) =>
+        Stream(Next(s"Need a $digit in $name",
+                    Placement(unknown.cellNumber, digit)))
+      case _ => Stream.empty
+    }
+  }
+
   def findForced : Stream[Next] = {
     // XXX Should unknowns be a Stream to begin with?
     // Currying is somewhat ugly in scala, but seems to be a smidge
@@ -232,10 +258,6 @@ case class Solver (
   }
 
   def findTricky : Stream[Next] = {
-    Stream.empty
-  }
-
-  def findNeeded : Stream[Next] = {
     Stream.empty
   }
 }
