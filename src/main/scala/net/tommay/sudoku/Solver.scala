@@ -176,6 +176,26 @@ case class Solver (
     }
   }
 
+  // Try to place a digit where a set has two unplaced cells.  We only
+  // place one of the digits but the second will follow quickly.
+
+  def findMissingTwo : Stream[Next] = {
+    ExclusionSet.exclusionSets.toStream.flatMap(findMissingTwoInSet(_))
+  }
+
+  def findMissingTwoInSet(set: ExclusionSet) : Stream[Next] = {
+    Solver.unknownsInSet(unknowns.toStream, set.cells) match {
+      case unknowns@Stream(_, _) =>
+        // Exactly two cells in the set are unknown.  Place digits in
+        // them if they are forced.  A random one will be choden
+        // upstream if necessary (and if we find anything to return).
+        unknowns.flatMap(findForcedForUnknown(s"Missing two in ${set.name}"))
+      case _ =>
+        // Zero too many unknowns for humans to easiy handle.
+        Stream.Empty
+    }
+  }
+
   def findForced : Stream[Next] = {
     // XXX Should unknowns be a Stream to begin with?
     // Currying is somewhat ugly in scala, but seems to be a smidge
@@ -208,10 +228,6 @@ case class Solver (
   }
 
   def findEasyPeasy : Stream[Next] = {
-    Stream.empty
-  }
-
-  def findMissingTwo : Stream[Next] = {
     Stream.empty
   }
 
