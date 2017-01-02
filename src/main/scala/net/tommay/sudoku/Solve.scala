@@ -25,7 +25,7 @@ object Solve {
   }
 
   val heuristics = List(
-    Forced)
+    MissingOne, Forced)
 
   val options = new SolverOptions(
     heuristics = heuristics,
@@ -44,7 +44,7 @@ object Solve {
   }
 
   def printSolution(solution: Solution) {
-    if (true) {
+    if (false) {
       solution.steps.foreach {step =>
         println(showStep(step))
       }
