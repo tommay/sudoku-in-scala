@@ -206,7 +206,7 @@ case class Solver (
 
   def findNeededInSet(set: ExclusionSet) : Stream[Next] = {
     val unknownsInSet = Solver.unknownsInSet(unknowns.toStream, set.cells)
-    (1 to 9).toStream.flatMap(findNeededDigitInSet(unknownsInSet, set.name))
+    Solver._1to9.flatMap(findNeededDigitInSet(unknownsInSet, set.name))
   }
 
   def findNeededDigitInSet
@@ -263,6 +263,11 @@ case class Solver (
 }
 
 object Solver {
+  // Having this pre-constructed makes a significant difference over
+  // calling toStream each time it's needed.
+
+  val _1to9 = (1 to 9).toStream
+
   def empty(options: SolverOptions, rnd: Option[Random], puzzle: Puzzle)
     : Solver =
   {
