@@ -93,9 +93,11 @@ case class Solver (
     // fewest possibilities remaining, which is also the best cell to
     // make a guess for.
 
+    // I tried using unknowns.minBy but ig was slower, wtf.
     val minUnknown = Util.minBy(unknowns, {x: Unknown => x.numPossible})
     val cellNumber = minUnknown.cellNumber
-    // This is a List:
+    // I tried matching on minUnknown.getPossible and only binding
+    // possible in case _, but it was slower, wtf.
     val possible = minUnknown.getPossible
     possible match {
       case Nil =>

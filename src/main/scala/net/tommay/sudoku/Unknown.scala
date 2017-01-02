@@ -37,6 +37,10 @@ case class Unknown(
     Integer.bitCount(possible)
   }
 
+  // This was replaced with lookups from a pre-computed Vector and then
+  // an Array, but even the array was slower than the recursive List
+  // creation, wtf.
+
   def getPossible : List[Int] = {
     getPossibleList(possible, 1)
   }
