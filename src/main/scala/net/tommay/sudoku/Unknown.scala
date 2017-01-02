@@ -38,22 +38,7 @@ case class Unknown(
   }
 
   def getPossible : List[Int] = {
-    getPossibleList(possible, 1)
-  }
-
-  def getPossibleList(p: Int, digit: Int) : List[Int] = {
-    if (p == 0) {
-      List()
-    }
-    else {
-      val rest = getPossibleList(p >> 1, digit + 1)
-      if ((p & 1) != 0) {
-        digit :: rest
-      }
-      else {
-        rest
-      }
-    }
+    Unknown.possibleLists(possible)
   }
 
   // Returns true if this and Other are in the same row, column, or
@@ -81,6 +66,8 @@ instance Eq Unknown where
 }
 
 object Unknown {
+  val possibleLists = (0 to 511).map(makePossibleList(_)).toArray
+
   // Returns a new Unknown at position cellNumber.  Determine the
   // Unknown's row, column, and square, set all digits possible.
 
@@ -94,5 +81,20 @@ object Unknown {
       col = col,
       square = square,
       possible = 0x1FF)
+  }
+
+  def makePossibleList(possible: Int, digit: Int = 1) : List[Int] = {
+    if (possible == 0) {
+      List()
+    }
+    else {
+      val rest = makePossibleList(possible >> 1, digit + 1)
+      if ((possible & 1) != 0) {
+        digit :: rest
+      }
+      else {
+        rest
+      }
+    }
   }
 }
