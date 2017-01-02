@@ -1,7 +1,5 @@
 package net.tommay.sudoku
 
-import net.tommay.sudoku.Heuristic._
-
 case class Solver (
   options: SolverOptions,
   rnd: Option[Random],
@@ -296,14 +294,14 @@ object Solver {
   // hint).  Using a Stream makes it ok either way since we'll only
   // compute what we need.
 
-  def getHeuristicFunction(heuristic: Heuristic) : Solver => Stream[Next] = {
+  def getHeuristicFunction(heuristic: Heuristic.Heuristic) : Solver => Stream[Next] = {
     heuristic match {
-      case EasyPeasy => {_.findEasyPeasy}
-      case MissingOne => {_.findMissingOne}
-      case MissingTwo => {_.findMissingTwo}
-      case Tricky => {_.findTricky}
-      case Needed => {_.findNeeded}
-      case Forced => {_.findForced}
+      case Heuristic.EasyPeasy => {_.findEasyPeasy}
+      case Heuristic.MissingOne => {_.findMissingOne}
+      case Heuristic.MissingTwo => {_.findMissingTwo}
+      case Heuristic.Tricky => {_.findTricky}
+      case Heuristic.Needed => {_.findNeeded}
+      case Heuristic.Forced => {_.findForced}
     }
   }
 
