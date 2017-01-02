@@ -178,7 +178,8 @@ case class Solver (
 
   def findForced : Stream[Next] = {
     // XXX Should unknowns be a Stream to begin with?
-    // XXX test performance of currying vs. not.
+    // Currying is somewhat ugly in scala, but seems to be a smidge
+    // faster,
     unknowns.toStream.flatMap(findForcedForUnknown("Forced"))
   }
 
