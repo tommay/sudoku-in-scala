@@ -1,7 +1,5 @@
 package net.tommay.sudoku
 
-import net.tommay.sudoku.Heuristic._
-
 object Solve {
   // Initializes Puzzle from the given Filename and prints out solutions
   // if any.
@@ -24,8 +22,7 @@ object Solve {
     println(s"There are $count solutions.")
   }
 
-  val heuristics = List(
-    MissingOne, Forced)
+  val heuristics = List(Heuristic.EasyPeasy, Heuristic.Forced)
 
   val options = new SolverOptions(
     heuristics = heuristics,

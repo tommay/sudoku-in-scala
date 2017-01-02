@@ -254,7 +254,7 @@ case class Solver (
   }
 
   def findEasyPeasy : Stream[Next] = {
-    Stream.empty
+    EasyPeasy.find(puzzle, unknowns)
   }
 
   def findTricky : Stream[Next] = {
