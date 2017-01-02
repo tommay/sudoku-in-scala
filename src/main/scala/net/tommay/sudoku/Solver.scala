@@ -279,15 +279,12 @@ object Solver {
     }
   }
 
-  // XXX Use a Set instead of an Iterable?
+  // XXX Maybe a set intersection?  Use a Set for the larger set?
 
-  def unknownsInSet(unknowns: Stream[Unknown], set: Iterable[Int])
+  def unknownsInSet(unknowns: Stream[Unknown], set: Set[Int])
     : Stream[Unknown] =
   {
-    // XXX when set is an Iterable this needs to use exists, for most
-    // things it's more straightforward to use contains.
-
-    unknowns.filter(u => set.exists(_ == u.cellNumber))
+    unknowns.filter(u => set.contains(u.cellNumber))
   }
 
   def maybeShuffle[T](rnd: Option[Random], list: List[T]) : List[T] = {

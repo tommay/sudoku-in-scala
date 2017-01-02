@@ -8,7 +8,7 @@ package net.tommay.sudoku
 
 case class ExclusionSet(
   name: String,
-  cells: Iterable[Int])
+  cells: Set[Int])
 {
 }
 
@@ -19,7 +19,7 @@ object ExclusionSet {
     (0 to 8).map(row)
 
   def row(n: Int) : ExclusionSet = {
-    ExclusionSet(s"row $n", (0 to 8).map(col => n*9 + col))
+    ExclusionSet(s"row $n", (0 to 8).map(col => n*9 + col).toSet)
   }
 
   // An ExclusionSet for each column.
@@ -28,7 +28,7 @@ object ExclusionSet {
     (0 to 8).map(column)
 
   def column(n: Int) : ExclusionSet = {
-    ExclusionSet(s"column $n", (0 to 8).map(row => row*9 + n))
+    ExclusionSet(s"column $n", (0 to 8).map(row => row*9 + n).toSet)
   }
 
   // An ExclusionSet for each square.
@@ -40,7 +40,7 @@ object ExclusionSet {
     // row and col of upper left corner of square
     val row = n / 3 * 3
     val col = n % 3 * 3
-    val cellNumbers = (0 to 8).map(n => (row + n / 3)*9 + (col + n % 3))
+    val cellNumbers = (0 to 8).map(n => (row + n / 3)*9 + (col + n % 3)).toSet
     ExclusionSet(s"square $n", cellNumbers)
   }
 
