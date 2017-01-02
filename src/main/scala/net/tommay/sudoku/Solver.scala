@@ -95,17 +95,18 @@ case class Solver (
 
     val minUnknown = Util.minBy(unknowns, {x: Unknown => x.numPossible})
     val cellNumber = minUnknown.cellNumber
-    minUnknown.numPossible match {
-      case 0 =>
+    // This is a List:
+    val possible = minUnknown.getPossible
+    possible match {
+      case Nil =>
         // Failed.  No solutions.
         Stream.empty
-      case 1 =>
+      case List(digit) =>
         // One possibility.  The choice is forced, no guessing.  But
         // we only use the force if a) we're guessing, b) we're not
         // using heuristics, because if we are then forcing is done by
         // findForced.
         if (options.useGuessing && !options.useHeuristics) {
-          val digit = minUnknown.getPossible.head
           val next = Next("Forced guess", Placement(cellNumber, digit))
           placeAndContinue(next)
         }
@@ -118,7 +119,7 @@ case class Solver (
             case _ => Stream.empty
           }
         }
-      case _ =>
+      case  _ =>
         // Multiple possibilities.  Before we guess, see if it's
         // possible to permanently apply a TrickySet to create
         // possibiities for heuristics.
@@ -130,7 +131,6 @@ case class Solver (
               // recurse.  We could use Random.split when shuffling or
               // recursing, but it's not really important for this
               // application.
-              val possible = minUnknown.getPossible
               val shuffledPossible = Solver.maybeShuffle(rnd, possible)
               doGuesses(cellNumber, shuffledPossible)
             }
