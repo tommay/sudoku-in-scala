@@ -205,21 +205,9 @@ case class Solver (
   }
 
   def findNeededInSet(set: ExclusionSet) : Stream[Next] = {
-    val unknownsInSet = Solver.unknownsInSet(unknowns.toStream, set.cells)
-    Solver._1to9.flatMap(findNeededDigitInSet(unknownsInSet, set.name))
-  }
-
-  def findNeededDigitInSet
-    (unknowns: Stream[Unknown], name:  String)
-    (digit: Int)
-    : Stream[Next] =
-  {
-    unknowns.filter(_.isDigitPossible(digit)) match {
-      case Stream(unknown) =>
-        Stream(Next(s"Need a $digit in $name",
-                    Placement(unknown.cellNumber, digit)))
-      case _ => Stream.empty
-    }
+    lazy val description = s"Needed in ${set.name}"
+    Solver._1to9.flatMap(Solver.findNeededDigitInSet(
+      unknowns.toStream, set, description))
   }
 
   def findForced : Stream[Next] = {
@@ -328,6 +316,20 @@ object Solver {
     : Stream[Unknown] =
   {
     unknowns.filter(u => set.contains(u.cellNumber))
+  }
+
+  def findNeededDigitInSet
+    (unknowns: Stream[Unknown], exclusionSet: ExclusionSet,
+      description: => String)
+    (digit: Int)
+    : Stream[Next] =
+  {
+    val unknownsFromSet = unknownsInSet(unknowns, exclusionSet.cells)
+    unknownsFromSet.filter(_.isDigitPossible(digit)) match {
+      case Stream(unknown) =>
+        Stream(Next(description, Placement(unknown.cellNumber, digit)))
+      case _ => Stream.empty
+    }
   }
 
   def maybeShuffle[T](rnd: Option[Random], list: List[T]) : List[T] = {

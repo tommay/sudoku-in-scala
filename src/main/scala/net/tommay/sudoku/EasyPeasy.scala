@@ -59,22 +59,9 @@ object EasyPeasy {
     (exclusionSet: ExclusionSet)
       : Stream[Next] =
   {
-    val unknownsInSet = Solver.unknownsInSet(
-      unknowns.toStream, exclusionSet.cells)
-    digits.flatMap(placeDigitInSet(unknownsInSet, exclusionSet))
-  }
-
-  def placeDigitInSet
-    (unknownsInSet: Iterable[Unknown], set: ExclusionSet)
-    (digit: Int)
-    : Stream[Next] =
-  {
-    unknownsInSet.filter(_.isDigitPossible(digit)) match {
-      case Stream(unknown) =>
-        Stream(Next(s"Easy peasy ${set.name}",
-                    Placement(unknown.cellNumber, digit)))
-      case _ => Stream.empty
-    }
+    lazy val description = s"Easy peasy in ${exclusionSet.name}"
+    digits.flatMap(Solver.findNeededDigitInSet(
+      unknowns.toStream, exclusionSet, description))
   }
 
   def countDigitsInSet(
