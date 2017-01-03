@@ -1,13 +1,16 @@
 package net.tommay.sudoku
 
-// Given a stripe pf three columns (or rows) col0, col1, and col2.
+// Given a Stripe pf three columns (or rows) col0, col1, and col2.
 // Determine the digits that are common to col1 and col2.  For each digit,
-// If there is only one Unknown in col0 where the digit is possible, that's
+// if there is only one Unknown in col0 where the digit is possible, that's
 // an EasyPeasy placement.
 
-// Count the occurences of each digit in the entire stripe.  If the
-// digit has two occurences, check col0/col1/col2 to see if there's
-// only one unknown where the digit is possible.
+case class Stripe (
+  col0: ExclusionSet,
+  col1: ExclusionSet,
+  col2: ExclusionSet)
+{
+}
 
 object EasyPeasy {
   // Easy peasies are found by using stripes of three rows or columns.
@@ -16,25 +19,25 @@ object EasyPeasy {
   // stripe.  Here we build all the possible stripes so they can be
   // searched for easy peasies.
 
-  val easyPeasyStripes : Stream[(ExclusionSet, ExclusionSet, ExclusionSet)] = {
+  val stripes : Stream[Stripe] = {
     Util.slices(3, (ExclusionSet.rows ++ ExclusionSet.columns))
       .toStream
-      .flatMap(makeEasyPeasyStripe)
+      .map(_.toStream)
+      .flatMap(makeStripe)
   }
 
-  def makeEasyPeasyStripe(slice: Iterable[ExclusionSet])
-    : Iterable[(ExclusionSet, ExclusionSet, ExclusionSet)] =
+  def makeStripe(slice: Iterable[ExclusionSet]) : Iterable[Stripe] =
   {
     slice.map{set =>
       val others = slice.filter(_ != set)
-      (set, others.head, others.tail.head)
+      Stripe(set, others.head, others.tail.head)
     }
   }
 
   // Return a Stream of all possible easy peasy placements for the Puzzle.
 
   def find(puzzle: Puzzle, unknowns: Iterable[Unknown]) : Stream[Next] = {
-    easyPeasyStripes.flatMap(findForEasyPeasyStripe(puzzle, unknowns))
+    stripes.flatMap(findForEasyPeasyStripe(puzzle, unknowns))
   }
 
   // Returns any easy peasies in the Puzzle and EasyPeasyStripe.  All
@@ -42,14 +45,13 @@ object EasyPeasy {
 
   def findForEasyPeasyStripe
     (puzzle: Puzzle, unknowns: Iterable[Unknown])
-    (stripe: (ExclusionSet, ExclusionSet, ExclusionSet))
+    (stripe: Stripe)
     : Stream[Next] =
   {
-    val (col0, col1, col2) = stripe
-    val digitsInCol1 = getDigitsInSet(puzzle, col1)
-    val digitsInCol2 = getDigitsInSet(puzzle, col2)
+    val digitsInCol1 = getDigitsInSet(puzzle, stripe.col1)
+    val digitsInCol2 = getDigitsInSet(puzzle, stripe.col2)
     val easyPeasyDigits = digitsInCol1 & digitsInCol2
-    easyPeasyDigits.toStream.flatMap(placeDigitInSet(unknowns, col0))
+    easyPeasyDigits.toStream.flatMap(placeDigitInSet(unknowns, stripe.col0))
   }
 
   def getDigitsInSet(puzzle: Puzzle, set: ExclusionSet) : Set[Int] = {
@@ -65,7 +67,7 @@ object EasyPeasy {
   def placeDigitInSet
     (unknowns: Iterable[Unknown], set: ExclusionSet)
     (digit: Int)
-    : Stream[Next] =
+      : Stream[Next] =
   {
     val unknownsInSet = Solver.unknownsInSet(unknowns.toStream, set.cells)
     unknownsInSet.filter(_.isDigitPossible(digit)) match {
