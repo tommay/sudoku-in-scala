@@ -1,14 +1,13 @@
 package net.tommay.sudoku
 
 // Given a Stripe pf three columns (or rows) col0, col1, and col2.
-// Determine the digits that are common to col1 and col2.  For each digit,
-// if there is only one Unknown in col0 where the digit is possible, that's
-// an EasyPeasy placement.
+// Count the occurences of each digit in the entire Stripe.  For each
+// digit with two occurences, check col0/col1/col2 to see if there's
+// only one Unknown where the digit is possible.
 
-case class Stripe (
-  col0: ExclusionSet,
-  col1: ExclusionSet,
-  col2: ExclusionSet)
+case class Stripe(
+  cells: Set[Int],
+  exclusionSets: Stream[ExclusionSet])
 {
 }
 
@@ -23,15 +22,14 @@ object EasyPeasy {
     Util.slices(3, (ExclusionSet.rows ++ ExclusionSet.columns))
       .toStream
       .map(_.toStream)
-      .flatMap(makeStripe)
+      .map(makeStripe)
   }
 
-  def makeStripe(slice: Iterable[ExclusionSet]) : Iterable[Stripe] =
-  {
-    slice.map{set =>
-      val others = slice.filter(_ != set)
-      Stripe(set, others.head, others.tail.head)
+  def makeStripe(exclusionSets: Stream[ExclusionSet]) : Stripe = {
+    val allCells = exclusionSets.foldLeft(Set.empty[Int]){
+      case (accum, exclusionSet) => accum ++ exclusionSet.cells
     }
+    Stripe(allCells, exclusionSets)
   }
 
   // Return a Stream of all possible easy peasy placements for the Puzzle.
@@ -40,40 +38,53 @@ object EasyPeasy {
     stripes.flatMap(findForEasyPeasyStripe(puzzle, unknowns))
   }
 
-  // Returns any easy peasies in the Puzzle and EasyPeasyStripe.  All
-  // digits are considered
+  // Returns any easy peasies in the Puzzle and Stripe.  All digits
+  // are considered
 
   def findForEasyPeasyStripe
     (puzzle: Puzzle, unknowns: Iterable[Unknown])
     (stripe: Stripe)
     : Stream[Next] =
   {
-    val digitsInCol1 = getDigitsInSet(puzzle, stripe.col1)
-    val digitsInCol2 = getDigitsInSet(puzzle, stripe.col2)
-    val easyPeasyDigits = digitsInCol1 & digitsInCol2
-    easyPeasyDigits.toStream.flatMap(placeDigitInSet(unknowns, stripe.col0))
+    val doubleDigits =
+      countDigitsInSet(puzzle, stripe.cells)
+        .toStream
+        // XXX flatMap vs. filter + map
+        .filter{case (_, list) => list.size == 2}
+        .map{case (digit, _) => digit}
+    stripe.exclusionSets.flatMap(blah(unknowns, doubleDigits))
   }
 
-  def getDigitsInSet(puzzle: Puzzle, set: ExclusionSet) : Set[Int] = {
-    val cells = set.cells
-    // I tried toStream before filtering so the filtered list wouldn't
-    // have to be materialized but performance was much worse.
-    val placedInSet = puzzle.each.filter{case (cellNumber, _) => cells.contains(cellNumber)}
-    // I tried folding into and returning a scala.collection.mutable.Set,
-    // but it was a lot slower.
-    placedInSet.foldLeft(Set[Int]()){case (accum, (_, digit)) => accum + digit}
+  def blah
+    (unknowns: Iterable[Unknown], digits: Stream[Int])
+    (exclusionSet: ExclusionSet)
+      : Stream[Next] =
+  {
+    val unknownsInSet = Solver.unknownsInSet(
+      unknowns.toStream, exclusionSet.cells)
+    digits.flatMap(placeDigitInSet(unknownsInSet, exclusionSet))
   }
 
   def placeDigitInSet
-    (unknowns: Iterable[Unknown], set: ExclusionSet)
+    (unknownsInSet: Iterable[Unknown], set: ExclusionSet)
     (digit: Int)
-      : Stream[Next] =
+    : Stream[Next] =
   {
-    val unknownsInSet = Solver.unknownsInSet(unknowns.toStream, set.cells)
     unknownsInSet.filter(_.isDigitPossible(digit)) match {
       case Stream(unknown) =>
-        Stream(Next(s"Easy peasy ${set.name}", Placement(unknown.cellNumber, digit)))
+        Stream(Next(s"Easy peasy ${set.name}",
+                    Placement(unknown.cellNumber, digit)))
       case _ => Stream.empty
     }
+  }
+
+  def countDigitsInSet(
+    puzzle: Puzzle, cells: Set[Int])
+    : Map[Int, Iterable[Int]] =
+  {
+    val digitsInSet = puzzle.each
+      .filter{case (cellNumber, _) => cells.contains(cellNumber)}
+      .map{case (_, digit) => digit}
+    digitsInSet.groupBy(identity)
   }
 }
