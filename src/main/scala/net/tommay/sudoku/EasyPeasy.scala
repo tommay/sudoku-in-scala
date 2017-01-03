@@ -49,7 +49,6 @@ object EasyPeasy {
     val doubleDigits =
       countDigitsInSet(puzzle, stripe.cells)
         .toStream
-        // XXX flatMap vs. filter + map
         .filter{case (_, list) => list.size == 2}
         .map{case (digit, _) => digit}
     stripe.exclusionSets.flatMap(blah(unknowns, doubleDigits))
