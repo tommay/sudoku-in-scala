@@ -19,7 +19,7 @@ object Solve {
     // so the top-level call has the head, except that Scala properly
     // optimizes the recursive tail call so we're ok.
     val count = processAndCount(
-      Solver.randomSolutions(options, rnd, puzzle),
+      Solver.randomSolutions(options, rnd)(puzzle),
       printSolution)
     println(s"There are $count solutions.")
   }

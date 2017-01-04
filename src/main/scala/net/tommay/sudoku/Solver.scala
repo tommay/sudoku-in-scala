@@ -295,14 +295,26 @@ object Solver {
     }
   }
 
-  def randomSolutions(
-    options: SolverOptions,
-    rnd: Random,
-    puzzle: Puzzle)
-    : Stream[Solution] =
+  // Try to solve the Puzzle, returning a list of Solutions.
+
+  def solutions(options: SolverOptions)(puzzle: Puzzle) : Stream[Solution] = {
+    val solver = Solver.create(options, None, puzzle)
+    solver.solutionsTop
+  }
+
+  def randomSolutions
+    (options: SolverOptions, rnd: Random)
+    (puzzle: Puzzle)
+      : Stream[Solution] =
   {
     val solver = Solver.create(options, Some(rnd), puzzle)
     solver.solutionsTop
+  }
+
+  // Compute all the solutions and return them in a random order.
+
+  def allRandomSolutions(rnd: Random)(puzzle: Puzzle) = {
+    randomSolutions(SolverOptions.all, rnd)(puzzle)
   }
 
   def maybeSplit(rnd: Option[Random]) : (Option[Random], Option[Random]) = {
