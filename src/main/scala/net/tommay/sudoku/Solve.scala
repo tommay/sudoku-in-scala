@@ -10,7 +10,7 @@ object Solve {
     val filename = args(0)
     val setup = getSetup(filename)
     val puzzle = Puzzle.fromString(setup)
-    val rnd = Random
+    val rnd = new Random(2)
     // It is critical not to put the result of randomSolutions in a
     // val here because that holds onto the head even though it would
     // just be passed to processAndCount and the val would become dead
