@@ -258,21 +258,15 @@ object Solver {
 
   val _1to9 = (1 to 9).toStream
 
-  def empty(options: SolverOptions, rnd: Option[Random], puzzle: Puzzle)
+  def create(options: SolverOptions, rnd: Option[Random], puzzle: Puzzle)
     : Solver =
   {
     val (rnd1, rnd2) = maybeSplit(rnd)
     val unknowns = maybeShuffle(rnd1, (0 to 80).map(Unknown(_)).toList)
     val step = Step(puzzle, None, "Initial puzzle")
     val heuristicFunctions = options.heuristics.map(getHeuristicFunction)
-    new Solver(options, rnd, puzzle, unknowns, List(step),
-               heuristicFunctions)
-  }
-
-  def create(options: SolverOptions, rnd: Option[Random], puzzle: Puzzle)
-    : Solver =
-  {
-    val solver = empty(options, rnd, puzzle)
+    val solver = new Solver(
+      options, rnd, puzzle, unknowns, List(step), heuristicFunctions)
     puzzle.each.foldLeft(solver) {case (accum, (cellNumber, digit)) =>
       accum.place(cellNumber, digit)
     }
