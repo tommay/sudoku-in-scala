@@ -1,5 +1,7 @@
 package net.tommay.sudoku
 
+import scala.util.Random
+
 object Util {
   // Slice an list up into sub-lists of n elements, and return the
   // sub-lists in a list.
@@ -21,8 +23,11 @@ object Util {
     minEnhanced._2
   }
 
-  def shuffle[T](list: List[T], rnd: Random) : List[T] = {
-    // XXX
-    list
+  def shuffle[T](list: Iterable[T], rnd: Random) : List[T] = {
+    rnd.shuffle(list.toList)
+  }
+
+  def split(rnd: Random) : (Random, Random) = {
+    (rnd, rnd)
   }
 }

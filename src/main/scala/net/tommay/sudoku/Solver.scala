@@ -1,5 +1,7 @@
 package net.tommay.sudoku
 
+import scala.util.Random
+
 case class Solver (
   options: SolverOptions,
   rnd: Option[Random],
@@ -305,8 +307,10 @@ object Solver {
 
   def maybeSplit(rnd: Option[Random]) : (Option[Random], Option[Random]) = {
     rnd match {
-      case r@Some(rnd) => (r, Some(rnd.fork))
-      case _ => (rnd, rnd)
+      case Some(rnd) =>
+        val (rnd1, rnd2) = Util.split(rnd)
+        (Some(rnd), Some(rnd))
+      case _ => (None, None)
     }
   }
 

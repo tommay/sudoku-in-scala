@@ -1,5 +1,7 @@
 package net.tommay.sudoku
 
+import scala.util.Random
+
 object Solve {
   // Initializes Puzzle from the given Filename and prints out solutions
   // if any.
@@ -8,7 +10,7 @@ object Solve {
     val filename = args(0)
     val setup = getSetup(filename)
     val puzzle = Puzzle.fromString(setup)
-    val rnd = new Random()
+    val rnd = Random
     // It is critical not to put the result of randomSolutions in a
     // val here because that holds onto the head even though it would
     // just be passed to processAndCount and the val would become dead
@@ -22,7 +24,7 @@ object Solve {
     println(s"There are $count solutions.")
   }
 
-  val heuristics = List(Heuristic.EasyPeasy, Heuristic.Forced)
+  val heuristics = List(Heuristic.Needed, Heuristic.Forced)
 
   val options = new SolverOptions(
     heuristics = heuristics,
