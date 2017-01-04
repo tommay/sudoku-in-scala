@@ -10,7 +10,7 @@ case class Solver (
   // steps is consed in reverse order.  It is reversed when
   // constructing a Solution.
   steps: List[Step],
-  heuristics: Iterable[Solver => Stream[Next]])
+  heuristics: Stream[Solver => Stream[Next]])
 {
   def place(cellNumber: Int, digit: Int) : Solver = {
     val newPuzzle = puzzle.place(cellNumber, digit)
@@ -41,37 +41,22 @@ case class Solver (
 
   def solutionsHeuristic : Stream[Solution] = {
     if (options.useHeuristics) {
-      // Try the heuristic functions.
-      tryHeuristics(heuristics) match {
+      val (rnd1, rnd2) = Solver.maybeSplit(rnd)
+      heuristics.flatMap {func =>
+        Solver.maybeShuffle(rnd1, func(this))
+      } match {
         case Stream.Empty =>
           // All heuristics returned empty lists.
           solutionsStuck
         case nextList =>
-          val (rnd1, rnd2) = Solver.maybeSplit(rnd)
-          val next = Solver.maybeShuffle(rnd1, nextList).head
           val nextSolver = this.copy(rnd = rnd2)
+          val next = nextList.head
           nextSolver.placeAndContinue(next)
       }
     }
     else {
       // Skip the heuristics and continue with solutionsStuck.
       solutionsStuck
-    }
-  }
-
-  // Call each function on this, and return the first non-empty
-  // result.  Return an empty list if all results are empty.
-
-  def tryHeuristics(list: Iterable[Solver => Stream[Next]])
-    : Stream[Next] =
-  {
-    list match {
-      case Nil => Stream.empty
-      case func :: tail =>
-        func(this) match {
-          case Stream.Empty => tryHeuristics(tail)
-          case nextList => nextList
-        }
     }
   }
 
@@ -262,7 +247,8 @@ object Solver {
     val (rnd1, rnd2) = maybeSplit(rnd)
     val unknowns = maybeShuffle(rnd1, (0 to 80).map(Unknown(_)))
     val step = Step(puzzle, None, "Initial puzzle")
-    val heuristicFunctions = options.heuristics.map(getHeuristicFunction)
+    val heuristicFunctions =
+      options.heuristics.map(getHeuristicFunction).toStream
     val solver = new Solver(
       options, rnd, puzzle, unknowns, List(step), heuristicFunctions)
     puzzle.each.foldLeft(solver) {case (accum, (cellNumber, digit)) =>
