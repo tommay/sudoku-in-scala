@@ -43,7 +43,14 @@ case class Solver (
     if (options.useHeuristics) {
       val (rnd1, rnd2) = Solver.maybeSplit(rnd)
       heuristics.flatMap {func =>
-        Solver.maybeShuffle(rnd1, func(this))
+        func(this) match {
+          case x@Stream.Empty => x
+          case stream =>
+            rnd1 match {
+              case None => stream
+              case Some(rnd1) => Shuffler.shuffle(rnd1, stream)
+            }
+        }
       } match {
         case Stream.Empty =>
           // All heuristics returned empty lists.
@@ -334,3 +341,4 @@ object Solver {
     }
   }
 }
+
