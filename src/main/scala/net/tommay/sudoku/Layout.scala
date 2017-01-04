@@ -103,7 +103,7 @@ object Layout {
     val layoutMap = layoutList
       .map{case (name, func) => (name.toLowerCase, func)}
       .toMap
-    layoutMap.get(name) match {
+    layoutMap.get(name.toLowerCase) match {
       case None => None
       case Some(func) =>
         val sets = (0 to 80).map(func(_))
