@@ -43,12 +43,18 @@ case class Solver (
     if (options.useHeuristics) {
       val (rnd1, rnd2) = Solver.maybeSplit(rnd)
       heuristics.flatMap {func =>
+        // We're only going to be using the head of the whole
+        // heuristics Stream (see below), so just keep one random
+        // element of the heuristic's results, if any, in the Stream.
+        // We could also shuffle the order of the heuristic's results,
+        // but that requires the Stream to be materialized as an
+        // Array.
         func(this) match {
-          case x@Stream.Empty => x
+          case empty@Stream.Empty => empty
           case stream =>
             rnd1 match {
               case None => stream
-              case Some(rnd1) => Shuffler.shuffle(rnd1, stream)
+              case Some(rnd1) => Stream(Solver.pickRandom(rnd1, stream))
             }
         }
       } match {
@@ -339,6 +345,18 @@ object Solver {
       case Some(rnd) => Util.shuffle(list.toList, rnd)
       case _ => list
     }
+  }
+
+  def pickRandom[T](rnd: Random, list: Iterable[T]) : T = {
+    list.tail.foldLeft((1, list.head)) {case ((n, choice), element) =>
+      val n1 = n + 1
+      if (rnd.nextInt(n1) == 0) {
+        (n1, element)
+      }
+      else {
+        (n1, choice)
+      }
+    }._2
   }
 }
 
