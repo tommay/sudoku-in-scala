@@ -43,17 +43,14 @@ case class Solver (
     if (options.useHeuristics) {
       val (rnd1, rnd2) = Solver.maybeSplit(rnd)
       heuristics.flatMap {func =>
-        // We're only going to be using the head of the whole
-        // heuristics Stream (see below), so just keep one random
-        // element of the heuristic's results, if any, in the Stream.
-        // We could also shuffle the order of the heuristic's results,
-        // but that requires the Stream to be materialized as an
-        // Array.
         func(this) match {
           case empty@Stream.Empty => empty
           case stream =>
             rnd1 match {
               case None => stream
+              // We're only going to be using the head of the whole
+              // heuristics Stream (see below), so just keep one random
+              // element of the heuristic's results, if any, in the Stream.
               case Some(rnd1) => Stream(Solver.pickRandom(rnd1, stream))
             }
         }
@@ -347,16 +344,13 @@ object Solver {
     }
   }
 
-  def pickRandom[T](rnd: Random, list: Iterable[T]) : T = {
-    list.tail.foldLeft((1, list.head)) {case ((n, choice), element) =>
-      val n1 = n + 1
-      if (rnd.nextInt(n1) == 0) {
-        (n1, element)
-      }
-      else {
-        (n1, choice)
-      }
-    }._2
+  import scala.reflect.ClassTag
+
+  def pickRandom[T:ClassTag](rnd: Random, list: Iterable[T]) : T = {
+    // Forget being tricky and general and handling arbitrarily
+    // large Iterables and Streaming shuffled results.  Just
+    // materialize the thing and pick something.
+    val array = list.toArray
+    array(rnd.nextInt(array.size))
   }
 }
-
