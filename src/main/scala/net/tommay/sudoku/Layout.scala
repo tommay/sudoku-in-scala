@@ -46,7 +46,9 @@ object Layout {
     List(0, 3, 6, 27, 30, 33, 54, 57, 60).map(base + _)
   }
 
-  def spinny(result: Iterable[Int])(n: Int) : Iterable[Int] = {
+  def spinny(result: List[Int])(n: Int) : Iterable[Int] = {
+    // Rotate n 90 degrees, cons it, and recurse until we've come back
+    // to where we started.
     if (result.exists(_ == n)) {
       result
     }
@@ -54,7 +56,7 @@ object Layout {
       val (row, col) = rowcol(n)
       val rowPrime = col
       val colPrime = 8 - row
-      spinny(result)(rowPrime * 9 + colPrime)
+      spinny(n :: result)(rowPrime * 9 + colPrime)
     }
   }
 
