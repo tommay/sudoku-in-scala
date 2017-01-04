@@ -6,7 +6,7 @@ case class Solver (
   options: SolverOptions,
   rnd: Option[Random],
   puzzle: Puzzle,
-  unknowns: List[Unknown],
+  unknowns: Iterable[Unknown],
   // steps is consed in reverse order.  It is reversed when
   // constructing a Solution.
   steps: List[Step],
@@ -48,9 +48,7 @@ case class Solver (
           solutionsStuck
         case nextList =>
           val (rnd1, rnd2) = Solver.maybeSplit(rnd)
-          // XXX if we're not doing things at random then all we ever need
-          // is the first element.
-          val next = Solver.pickRandom(nextList, rnd1)
+          val next = Solver.maybeShuffle(rnd1, nextList).head
           val nextSolver = this.copy(rnd = rnd2)
           nextSolver.placeAndContinue(next)
       }
@@ -262,7 +260,7 @@ object Solver {
     : Solver =
   {
     val (rnd1, rnd2) = maybeSplit(rnd)
-    val unknowns = maybeShuffle(rnd1, (0 to 80).map(Unknown(_)).toList)
+    val unknowns = maybeShuffle(rnd1, (0 to 80).map(Unknown(_)))
     val step = Step(puzzle, None, "Initial puzzle")
     val heuristicFunctions = options.heuristics.map(getHeuristicFunction)
     val solver = new Solver(
@@ -278,7 +276,8 @@ object Solver {
   // hint).  Using a Stream makes it ok either way since we'll only
   // compute what we need.
 
-  def getHeuristicFunction(heuristic: Heuristic.Heuristic) : Solver => Stream[Next] = {
+  def getHeuristicFunction(heuristic: Heuristic.Heuristic)
+      : Solver => Stream[Next] = {
     heuristic match {
       case Heuristic.EasyPeasy => {_.findEasyPeasy}
       case Heuristic.MissingOne => {_.findMissingOne}
@@ -342,15 +341,10 @@ object Solver {
     }
   }
 
-  def maybeShuffle[T](rnd: Option[Random], list: List[T]) : List[T] = {
+  def maybeShuffle[T](rnd: Option[Random], list: Iterable[T]) : Iterable[T] = {
     rnd match {
-      case Some(rnd) => Util.shuffle(list, rnd)
+      case Some(rnd) => Util.shuffle(list.toList, rnd)
       case _ => list
     }
-  }
-
-  def pickRandom[T](list: Iterable[T], rnd: Option[Random]) : T = {
-    // XXX
-    list.head
   }
 }
