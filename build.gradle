@@ -4,7 +4,7 @@
 apply plugin: 'scala'
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -14,7 +14,7 @@ dependencies {
 // http://stackoverflow.com/questions/27494428/running-a-jar-produce-from-gradle-build
 jar {
     manifest {
-        attributes 'Main-Class': 'net.tommay.sudoku.Solve'
+        attributes 'Main-Class': 'net.tommay.sudoku.Create'
     }
     /*
     // This builds an uberjar:  Be nice to run it through proguard.
@@ -28,6 +28,8 @@ jar {
     }
     */
 }
+
+// Trying to figure out how to compile just one files.
 
 task compileOne (type: ScalaCompile) {
     source = sourceSets.main.scala.srcDirs
